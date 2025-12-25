@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= siteName %> - <%= tagline %></title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+    
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #ff6f61 0%, #e55a4e 100%);
+      color: white;
+      padding: 15px 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .logo {
+      font-size: 28px;
+      font-weight: bold;
+      text-decoration: none;
+      color: white;
+    }
+    
+    .logo span {
+      color: #ffe4e1;
+    }
+    
+    .search-bar {
+      flex: 1;
+      max-width: 500px;
+      margin: 0 30px;
+    }
+    
+    .search-bar input {
+      width: 100%;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 25px;
+      font-size: 14px;
+      outline: none;
+    }
+    
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .header-actions a {
+      color: white;
+      text-decoration: none;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .cart-badge {
+      background: white;
+      color: #ff6f61;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, #ff6f61 0%, #e55a4e 100%);
+      color: white;
+      padding: 60px 20px;
+      text-align: center;
+    }
+    
+    .hero h1 {
+      font-size: 42px;
+      margin-bottom: 15px;
+    }
+    
+    .hero p {
+      font-size: 18px;
+      opacity: 0.9;
+    }
+    
+    /* Main Container */
+    .main-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    /* Categories */
+    .categories-section {
+      margin: 30px 0;
+    }
+    
+    .categories-section h2 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    
+    .categories-grid {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    
+    .category-chip {
+      padding: 10px 25px;
+      background: white;
+      border: 2px solid #ff6f61;
+      border-radius: 25px;
+      color: #ff6f61;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+    
+    .category-chip:hover,
+    .category-chip.active {
+      background: #ff6f61;
+      color: white;
+    }
+    
+    /* Products Section */
+    .products-section {
+      margin: 40px 0;
+    }
+    
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+    
+    .section-header h2 {
+      font-size: 24px;
+      color: #333;
+    }
+    
+    .sort-dropdown {
+      padding: 10px 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      cursor: pointer;
+    }
+    
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 25px;
+    }
+    
+    .product-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+    
+    .product-image {
+      height: 180px;
+      background: linear-gradient(135deg, #fff5f4 0%, #ffe4e1 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 60px;
+    }
+    
+    .product-info {
+      padding: 20px;
+    }
+    
+    .product-category {
+      display: inline-block;
+      padding: 4px 12px;
+      background: #fff5f4;
+      color: #ff6f61;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 10px;
+    }
+    
+    .product-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 5px;
+      height: 44px;
+      overflow: hidden;
+    }
+    
+    .product-brand {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 10px;
+    }
+    
+    .product-rating {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    
+    .rating-badge {
+      background: #388e3c;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    .rating-count {
+      color: #999;
+      font-size: 12px;
+    }
+    
+    .product-price {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .current-price {
+      font-size: 22px;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    .original-price {
+      font-size: 14px;
+      color: #999;
+      text-decoration: line-through;
+    }
+    
+    .discount-badge {
+      background: #e8f5e9;
+      color: #388e3c;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .prescription-tag {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+    
+    .prescription-tag.required {
+      background: #fff3e0;
+      color: #e65100;
+    }
+    
+    .prescription-tag.not-required {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    
+    .product-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #ff6f61 0%, #e55a4e 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(255, 111, 97, 0.4);
+    }
+    
+    .btn-secondary {
+      background: #f5f5f5;
+      color: #333;
+    }
+    
+    .btn-secondary:hover {
+      background: #eee;
+    }
+    
+    /* Features Section */
+    .features-section {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin: 50px 0;
+    }
+    
+    .feature-card {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+    }
+    
+    .feature-icon {
+      font-size: 40px;
+      margin-bottom: 15px;
+    }
+    
+    .feature-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    .feature-desc {
+      font-size: 13px;
+      color: #666;
+    }
+    
+    /* Footer */
+    .footer {
+      background: #333;
+      color: white;
+      padding: 50px 20px;
+      margin-top: 50px;
+    }
+    
+    .footer-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 40px;
+    }
+    
+    .footer-section h4 {
+      font-size: 16px;
+      margin-bottom: 20px;
+      color: #ff6f61;
+    }
+    
+    .footer-section ul {
+      list-style: none;
+    }
+    
+    .footer-section li {
+      margin-bottom: 10px;
+    }
+    
+    .footer-section a {
+      color: #999;
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.3s ease;
+    }
+    
+    .footer-section a:hover {
+      color: white;
+    }
+    
+    .footer-bottom {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #444;
+      color: #666;
+      font-size: 14px;
+    }
+    
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #388e3c;
+      color: white;
+      padding: 15px 25px;
+      border-radius: 8px;
+      display: none;
+      z-index: 2000;
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @media (max-width: 768px) {
+      .features-section {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .footer-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .hero h1 {
+        font-size: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-container">
+      <a href="/" class="logo">TATA <span>1mg</span></a>
+      <div class="search-bar">
+        <input type="text" placeholder="Search for medicines, health products and more..." id="searchInput" onkeyup="handleSearch(event)">
+      </div>
+      <div class="header-actions">
+        <a href="/cart?userId=user123">🛒 Cart <span class="cart-badge" id="cartCount">0</span></a>
+        <a href="#">👤 Account</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1>Your Trusted Health Partner</h1>
+    <p>Get medicines delivered at your doorstep with up to 25% off</p>
+  </section>
+
+  <!-- Main Content -->
+  <main class="main-container">
+    <!-- Categories -->
+    <section class="categories-section">
+      <h2>Shop by Category</h2>
+      <div class="categories-grid">
+        <a href="/" class="category-chip active">All</a>
+        <% categories.forEach(category => { %>
+          <a href="/?category=<%= category %>" class="category-chip"><%= category %></a>
+        <% }); %>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features-section">
+      <div class="feature-card">
+        <div class="feature-icon">🚚</div>
+        <h3 class="feature-title">Fast Delivery</h3>
+        <p class="feature-desc">Get medicines in 1-2 days</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💰</div>
+        <h3 class="feature-title">Best Prices</h3>
+        <p class="feature-desc">Up to 25% off on all medicines</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">✅</div>
+        <h3 class="feature-title">100% Genuine</h3>
+        <p class="feature-desc">Certified authentic products</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3 class="feature-title">Secure Payment</h3>
+        <p class="feature-desc">Multiple payment options</p>
+      </div>
+    </section>
+
+    <!-- Products -->
+    <section class="products-section">
+      <div class="section-header">
+        <h2>All Medicines</h2>
+        <select class="sort-dropdown" onchange="handleSort(this.value)">
+          <option value="">Sort By</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="rating-desc">Rating: High to Low</option>
+          <option value="discount-desc">Discount: High to Low</option>
+        </select>
+      </div>
+      
+      <div class="products-grid">
+        <% medicines.forEach(medicine => { %>
+          <div class="product-card">
+            <div class="product-image">💊</div>
+            <div class="product-info">
+              <span class="product-category"><%= medicine.category %></span>
+              <h3 class="product-name"><%= medicine.name %></h3>
+              <p class="product-brand"><%= medicine.brand %> | <%= medicine.manufacturer %></p>
+              
+              <div class="product-rating">
+                <span class="rating-badge">⭐ <%= medicine.rating %></span>
+                <span class="rating-count"><%= medicine.reviews %> reviews</span>
+              </div>
+              
+              <% if (medicine.prescriptionRequired) { %>
+                <span class="prescription-tag required">📋 Prescription Required</span>
+              <% } else { %>
+                <span class="prescription-tag not-required">✓ No Prescription</span>
+              <% } %>
+              
+              <div class="product-price">
+                <span class="current-price">₹<%= medicine.price.toFixed(2) %></span>
+                <span class="original-price">₹<%= medicine.mrp.toFixed(2) %></span>
+                <span class="discount-badge"><%= medicine.discount %>% OFF</span>
+              </div>
+              
+              <div class="product-actions">
+                <button class="btn btn-primary" onclick="addToCart('<%= medicine.id %>')">Add to Cart</button>
+                <a href="/product/<%= medicine.id %>" class="btn btn-secondary">View</a>
+              </div>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-section">
+        <h4>Know Us</h4>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Contact Us</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Blog</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h4>Our Services</h4>
+        <ul>
+          <li><a href="#">Order Medicine</a></li>
+          <li><a href="#">Healthcare Products</a></li>
+          <li><a href="#">Lab Tests</a></li>
+          <li><a href="#">Consult Doctor</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h4>Customer Support</h4>
+        <ul>
+          <li><a href="#">FAQ</a></li>
+          <li><a href="#">Return Policy</a></li>
+          <li><a href="#">Shipping Info</a></li>
+          <li><a href="#">Track Order</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h4>Connect With Us</h4>
+        <ul>
+          <li><a href="#">📧 support@tata1mg-mock.com</a></li>
+          <li><a href="#">📞 1800-xxx-xxxx</a></li>
+          <li><a href="#">📍 Mumbai, India</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 Tata 1mg Mock - For Testing Purposes Only</p>
+      <p>This is a mock website for MCP server testing. Not a real pharmacy.</p>
+    </div>
+  </footer>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const userId = 'user123';
+    
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 3000);
+    }
+    
+    async function addToCart(medicineId) {
+      try {
+        const response = await fetch(`/api/cart/${userId}/add`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ medicineId, quantity: 1 })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          showToast('✓ Added to cart!');
+          document.getElementById('cartCount').textContent = data.data.itemCount;
+        } else {
+          showToast('Failed: ' + data.error);
+        }
+      } catch (error) {
+        showToast('Error adding to cart');
+      }
+    }
+    
+    function handleSearch(event) {
+      if (event.key === 'Enter') {
+        const query = event.target.value;
+        window.location.href = '/?search=' + encodeURIComponent(query);
+      }
+    }
+    
+    function handleSort(value) {
+      if (!value) return;
+      const [field, order] = value.split('-');
+      window.location.href = '/?sortBy=' + field + '&order=' + order;
+    }
+    
+    async function loadCartCount() {
+      try {
+        const response = await fetch(`/api/cart/${userId}`);
+        const data = await response.json();
+        if (data.success) {
+          document.getElementById('cartCount').textContent = data.data.itemCount || 0;
+        }
+      } catch (error) {
+        console.error('Error loading cart');
+      }
+    }
+    
+    loadCartCount();
+  </script>
+</body>
+</html>

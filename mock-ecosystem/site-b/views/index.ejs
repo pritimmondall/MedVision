@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= siteName %> - <%= tagline %></title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; color: #333; }
+    
+    .header { background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%); color: white; padding: 15px 0; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
+    .header-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { font-size: 26px; font-weight: bold; text-decoration: none; color: white; display: flex; align-items: center; gap: 8px; }
+    .logo-icon { width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #1a237e; font-size: 20px; }
+    .search-bar { flex: 1; max-width: 500px; margin: 0 30px; }
+    .search-bar input { width: 100%; padding: 12px 20px; border: none; border-radius: 25px; font-size: 14px; outline: none; }
+    .header-actions { display: flex; align-items: center; gap: 20px; }
+    .header-actions a { color: white; text-decoration: none; font-size: 14px; display: flex; align-items: center; gap: 5px; }
+    .cart-badge { background: #ffd600; color: #1a237e; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: bold; }
+    
+    .hero { background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%); color: white; padding: 50px 20px; text-align: center; }
+    .hero h1 { font-size: 38px; margin-bottom: 12px; }
+    .hero p { font-size: 17px; opacity: 0.9; }
+    .hero-badge { display: inline-block; background: #ffd600; color: #1a237e; padding: 8px 20px; border-radius: 20px; font-weight: 600; font-size: 14px; margin-top: 15px; }
+    
+    .main-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    
+    .features-section { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin: 30px 0; }
+    .feature-card { background: white; padding: 22px; border-radius: 14px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.06); transition: transform 0.3s; }
+    .feature-card:hover { transform: translateY(-3px); }
+    .feature-icon { font-size: 36px; margin-bottom: 12px; }
+    .feature-title { font-size: 15px; font-weight: 600; color: #1a237e; margin-bottom: 6px; }
+    .feature-desc { font-size: 12px; color: #666; }
+    
+    .categories-section { margin: 30px 0; }
+    .categories-section h2 { font-size: 22px; margin-bottom: 18px; color: #1a237e; }
+    .categories-grid { display: flex; gap: 12px; flex-wrap: wrap; }
+    .category-chip { padding: 10px 22px; background: white; border: 2px solid #3949ab; border-radius: 25px; color: #3949ab; font-weight: 500; cursor: pointer; transition: all 0.3s; text-decoration: none; font-size: 14px; }
+    .category-chip:hover, .category-chip.active { background: #3949ab; color: white; }
+    
+    .products-section { margin: 35px 0; }
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
+    .section-header h2 { font-size: 22px; color: #1a237e; }
+    .sort-dropdown { padding: 10px 18px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 13px; outline: none; cursor: pointer; }
+    
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 22px; }
+    .product-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 18px rgba(0,0,0,0.08); transition: transform 0.3s, box-shadow 0.3s; }
+    .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 28px rgba(0,0,0,0.12); }
+    .product-image { height: 160px; background: linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%); display: flex; align-items: center; justify-content: center; font-size: 55px; }
+    .product-info { padding: 18px; }
+    .product-category { display: inline-block; padding: 4px 10px; background: #e8eaf6; color: #3949ab; border-radius: 10px; font-size: 11px; font-weight: 600; margin-bottom: 8px; }
+    .product-name { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 4px; height: 40px; overflow: hidden; }
+    .product-brand { font-size: 12px; color: #999; margin-bottom: 8px; }
+    .product-rating { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .rating-badge { background: #43a047; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+    .rating-count { color: #999; font-size: 11px; }
+    .product-price { display: flex; align-items: baseline; gap: 8px; margin-bottom: 12px; }
+    .current-price { font-size: 20px; font-weight: bold; color: #1a237e; }
+    .original-price { font-size: 13px; color: #999; text-decoration: line-through; }
+    .discount-badge { background: #e8f5e9; color: #388e3c; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .prescription-tag { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 10px; font-weight: 600; margin-bottom: 10px; }
+    .prescription-tag.required { background: #fff3e0; color: #e65100; }
+    .prescription-tag.not-required { background: #e8f5e9; color: #2e7d32; }
+    .delivery-tag { display: inline-block; padding: 4px 10px; background: #e3f2fd; color: #1565c0; border-radius: 4px; font-size: 10px; font-weight: 600; margin-left: 6px; }
+    .product-actions { display: flex; gap: 10px; }
+    .btn { flex: 1; padding: 11px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+    .btn-primary { background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%); color: white; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(26, 35, 126, 0.4); }
+    .btn-secondary { background: #f5f5f5; color: #333; }
+    .btn-secondary:hover { background: #e0e0e0; }
+    
+    .footer { background: #1a237e; color: white; padding: 45px 20px; margin-top: 45px; }
+    .footer-container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 35px; }
+    .footer-section h4 { font-size: 15px; margin-bottom: 18px; color: #ffd600; }
+    .footer-section ul { list-style: none; }
+    .footer-section li { margin-bottom: 10px; }
+    .footer-section a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 13px; transition: color 0.3s; }
+    .footer-section a:hover { color: white; }
+    .footer-bottom { text-align: center; margin-top: 35px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); font-size: 13px; }
+    
+    .toast { position: fixed; bottom: 30px; right: 30px; background: #1a237e; color: white; padding: 15px 25px; border-radius: 10px; display: none; z-index: 2000; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    
+    @media (max-width: 768px) {
+      .features-section { grid-template-columns: repeat(2, 1fr); }
+      .footer-container { grid-template-columns: repeat(2, 1fr); }
+      .hero h1 { font-size: 26px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-container">
+      <a href="/" class="logo">
+        <span class="logo-icon">🏥</span>
+        Apollo Pharmacy
+      </a>
+      <div class="search-bar">
+        <input type="text" placeholder="Search medicines, health products..." id="searchInput" onkeyup="handleSearch(event)">
+      </div>
+      <div class="header-actions">
+        <a href="/cart?userId=user123">🛒 Cart <span class="cart-badge" id="cartCount">0</span></a>
+        <a href="#">👤 Account</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>India's Most Trusted Pharmacy</h1>
+    <p>Genuine medicines at best prices with express delivery</p>
+    <span class="hero-badge">🚀 24 Hours Delivery Available</span>
+  </section>
+
+  <main class="main-container">
+    <section class="features-section">
+      <div class="feature-card">
+        <div class="feature-icon">🚀</div>
+        <h3 class="feature-title">Express Delivery</h3>
+        <p class="feature-desc">Get medicines in 24 hours</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💰</div>
+        <h3 class="feature-title">Best Prices</h3>
+        <p class="feature-desc">Up to 25% off everyday</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🏥</div>
+        <h3 class="feature-title">3000+ Stores</h3>
+        <p class="feature-desc">Pan India network</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">👨‍⚕️</div>
+        <h3 class="feature-title">Expert Pharmacists</h3>
+        <p class="feature-desc">Free consultation</p>
+      </div>
+    </section>
+
+    <section class="categories-section">
+      <h2>Browse Categories</h2>
+      <div class="categories-grid">
+        <a href="/" class="category-chip active">All Products</a>
+        <% categories.forEach(category => { %>
+          <a href="/?category=<%= category %>" class="category-chip"><%= category %></a>
+        <% }); %>
+      </div>
+    </section>
+
+    <section class="products-section">
+      <div class="section-header">
+        <h2>Popular Medicines</h2>
+        <select class="sort-dropdown" onchange="handleSort(this.value)">
+          <option value="">Sort By</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="rating-desc">Rating: High to Low</option>
+          <option value="discount-desc">Discount: High to Low</option>
+        </select>
+      </div>
+      
+      <div class="products-grid">
+        <% medicines.forEach(medicine => { %>
+          <div class="product-card">
+            <div class="product-image">💊</div>
+            <div class="product-info">
+              <span class="product-category"><%= medicine.category %></span>
+              <h3 class="product-name"><%= medicine.name %></h3>
+              <p class="product-brand"><%= medicine.brand %> | <%= medicine.manufacturer %></p>
+              
+              <div class="product-rating">
+                <span class="rating-badge">⭐ <%= medicine.rating %></span>
+                <span class="rating-count"><%= medicine.reviews %> ratings</span>
+              </div>
+              
+              <div>
+                <% if (medicine.prescriptionRequired) { %>
+                  <span class="prescription-tag required">📋 Rx</span>
+                <% } else { %>
+                  <span class="prescription-tag not-required">✓ OTC</span>
+                <% } %>
+                <span class="delivery-tag">🚀 24hrs</span>
+              </div>
+              
+              <div class="product-price">
+                <span class="current-price">₹<%= medicine.price.toFixed(2) %></span>
+                <span class="original-price">₹<%= medicine.mrp.toFixed(2) %></span>
+                <span class="discount-badge"><%= medicine.discount %>% OFF</span>
+              </div>
+              
+              <div class="product-actions">
+                <button class="btn btn-primary" onclick="addToCart('<%= medicine.id %>')">Add to Cart</button>
+                <a href="/product/<%= medicine.id %>" class="btn btn-secondary">View</a>
+              </div>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-section">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About Apollo</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Contact Us</a></li>
+          <li><a href="#">Store Locator</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h4>Services</h4>
+        <ul>
+          <li><a href="#">Medicine Delivery</a></li>
+          <li><a href="#">Health Checkups</a></li>
+          <li><a href="#">Lab Tests</a></li>
+          <li><a href="#">Doctor Consultation</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h4>Help</h4>
+        <ul>
+          <li><a href="#">FAQ</a></li>
+          <li><a href="#">Return Policy</a></li>
+          <li><a href="#">Track Order</a></li>
+          <li><a href="#">Payment Options</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="#">📧 help@apollopharmacy-mock.com</a></li>
+          <li><a href="#">📞 1800-xxx-xxxx</a></li>
+          <li><a href="#">📍 Hyderabad, India</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 Apollo Pharmacy Mock - For Testing Purposes Only</p>
+      <p style="margin-top: 8px;">This is a mock website for MCP server testing. Not a real pharmacy.</p>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const userId = 'user123';
+    
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+    
+    async function addToCart(medicineId) {
+      try {
+        const response = await fetch(`/api/cart/${userId}/add`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ medicineId, quantity: 1 })
+        });
+        const data = await response.json();
+        if (data.success) {
+          showToast('✓ Added to cart!');
+          document.getElementById('cartCount').textContent = data.data.itemCount;
+        } else {
+          showToast('Failed: ' + data.error);
+        }
+      } catch (error) {
+        showToast('Error adding to cart');
+      }
+    }
+    
+    function handleSearch(event) {
+      if (event.key === 'Enter') {
+        window.location.href = '/?search=' + encodeURIComponent(event.target.value);
+      }
+    }
+    
+    function handleSort(value) {
+      if (!value) return;
+      const [field, order] = value.split('-');
+      window.location.href = '/?sortBy=' + field + '&order=' + order;
+    }
+    
+    async function loadCartCount() {
+      try {
+        const response = await fetch(`/api/cart/${userId}`);
+        const data = await response.json();
+        if (data.success) {
+          document.getElementById('cartCount').textContent = data.data.itemCount || 0;
+        }
+      } catch (error) {}
+    }
+    
+    loadCartCount();
+  </script>
+</body>
+</html>

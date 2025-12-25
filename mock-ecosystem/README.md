@@ -1,269 +1,275 @@
-# Mock Medicine E-Commerce Ecosystem
+# Mock Medical E-Commerce Ecosystem
 
-This mock ecosystem contains two dummy medicine e-commerce sites that simulate real-world pharmacies like Tata 1mg and Apollo. These are designed for testing the MCV (Medical Comparison and Verification) server.
+This folder contains two fully functional mock medical e-commerce websites for testing the MCP (Medical Comparison & Purchase) server.
 
-## Architecture
+## 📁 Structure
 
 ```
 mock-ecosystem/
-├── server.js          (MCV Server Orchestrator on port 3000)
-├── site-a/
+├── site-a/                    # Mimics Tata 1mg
 │   ├── package.json
-│   └── server.js      (Premium Quality Pharmacy on port 3001)
-└── site-b/
-    ├── package.json
-    └── server.js      (Budget Friendly Pharmacy on port 3002)
+│   ├── server.js              # Express server with all APIs
+│   └── views/
+│       ├── index.ejs          # Homepage
+│       ├── product.ejs        # Product detail page
+│       ├── cart.ejs           # Shopping cart
+│       ├── checkout.ejs       # Checkout page
+│       ├── order.ejs          # Order confirmation
+│       └── error.ejs          # Error page
+│
+├── site-b/                    # Mimics Apollo Pharmacy
+│   ├── package.json
+│   ├── server.js              # Express server with all APIs
+│   └── views/
+│       ├── index.ejs          # Homepage
+│       ├── product.ejs        # Product detail page
+│       ├── cart.ejs           # Shopping cart
+│       ├── checkout.ejs       # Checkout page
+│       ├── order.ejs          # Order confirmation
+│       └── error.ejs          # Error page
+│
+└── README.md
 ```
 
-## Quick Start
+## 🚀 Quick Start
 
-### 1. Install Dependencies
-
+### Start Site-A (Tata 1mg Mock) - Port 3001
 ```bash
-# Install main ecosystem dependencies
+cd site-a
 npm install
-
-# Install Site A dependencies
-cd site-a && npm install && cd ..
-
-# Install Site B dependencies
-cd site-b && npm install && cd ..
-```
-
-### 2. Start All Servers
-
-You can run all three servers in separate terminals:
-
-**Terminal 1 - Site A (Premium, Port 3001):**
-```bash
-cd site-a && npm start
-```
-
-**Terminal 2 - Site B (Budget, Port 3002):**
-```bash
-cd site-b && npm start
-```
-
-**Terminal 3 - MCV Server (Orchestrator, Port 3000):**
-```bash
 npm start
 ```
+Visit: http://localhost:3001
 
-Or use the provided batch script (Windows):
+### Start Site-B (Apollo Mock) - Port 3002
 ```bash
-start-all.bat
+cd site-b
+npm install
+npm start
+```
+Visit: http://localhost:3002
+
+## 🔌 API Endpoints
+
+Both sites expose identical API structure (for MCP server compatibility):
+
+### Health Check
+```
+GET /api/health
 ```
 
-## Site Characteristics
-
-### Site A - Premium Quality Store (Port 3001)
-- **Pricing**: Higher prices
-- **Delivery**: 1-2 days (Fast)
-- **Quality Rating**: High (4.5-4.9)
-- **Use Case**: When you need medicine quickly and prefer quality
-
-**Medicines Available:**
-- Aspirin 500mg - ₹250
-- Vitamin D3 1000IU - ₹180
-- Amoxicillin 250mg - ₹120
-- Paracetamol 500mg - ₹80
-- Omeprazole 20mg - ₹200
-
-### Site B - Budget Friendly Store (Port 3002)
-- **Pricing**: Lower prices
-- **Delivery**: 2-3 days (Standard)
-- **Quality Rating**: Good (4.0-4.4)
-- **Use Case**: When you want to save money and can wait longer
-
-**Medicines Available:**
-- Aspirin 500mg - ₹180
-- Vitamin D3 1000IU - ₹120
-- Amoxicillin 250mg - ₹85
-- Paracetamol 500mg - ₹50
-- Omeprazole 20mg - ₹140
-- Metformin 500mg - ₹95
-
-## API Endpoints
-
-### Site A & Site B APIs
-
-#### Get All Medicines
-```bash
-curl http://localhost:3001/api/medicines
-curl http://localhost:3002/api/medicines
+### Medicines
+```
+GET  /api/medicines                    # List all medicines (with filters)
+GET  /api/medicines/:id                # Get medicine by ID
+POST /api/medicines/search             # Search by names array
+GET  /api/categories                   # Get all categories
 ```
 
-#### Search Medicines
-```bash
-curl http://localhost:3001/api/medicines/search/Aspirin
-curl http://localhost:3002/api/medicines/search/Vitamin
+**Query Parameters for `/api/medicines`:**
+- `category` - Filter by category
+- `search` - Search in name/generic/brand
+- `prescriptionRequired` - true/false
+- `inStock` - true
+- `sortBy` - price/rating/name/discount
+- `order` - asc/desc
+
+### Cart Operations
+```
+GET    /api/cart/:userId               # Get cart
+POST   /api/cart/:userId/add           # Add item
+PUT    /api/cart/:userId/update        # Update quantity
+DELETE /api/cart/:userId/remove/:id    # Remove item
+DELETE /api/cart/:userId/clear         # Clear cart
 ```
 
-#### Get Medicine by ID
-```bash
-curl http://localhost:3001/api/medicines/a1
-curl http://localhost:3002/api/medicines/b1
+### Orders
+```
+POST /api/orders/create                # Create order
+POST /api/orders/:orderId/pay          # Process payment
+GET  /api/orders/:orderId              # Get order details
+GET  /api/orders/user/:userId          # Get user orders
+PUT  /api/orders/:orderId/status       # Update status
 ```
 
-#### Create Order
-```bash
-curl -X POST http://localhost:3001/api/orders \
-  -H "Content-Type: application/json" \
-  -d '{
-    "medicines": [
-      {"medicineId": "a1", "quantity": 10}
-    ],
-    "userEmail": "user@example.com",
-    "address": "123 Main St, City, State",
-    "paymentMethod": "COD"
-  }'
+### Prescription
+```
+POST /api/prescription/upload          # Upload prescription
+POST /api/prescription/:id/verify      # Verify prescription
 ```
 
-#### Get Order Status
-```bash
-curl http://localhost:3001/api/orders/SITE-A-1234567890
+### Delivery
+```
+GET /api/delivery/slots                # Get available slots
 ```
 
-#### Compare Pricing
-```bash
-curl -X POST http://localhost:3001/api/pricing/compare \
-  -H "Content-Type: application/json" \
-  -d '{
-    "medicineNames": ["Aspirin 500mg", "Vitamin D3 1000IU"]
-  }'
+### Users
+```
+GET  /api/users/:userId                # Get user profile
+POST /api/users/:userId/addresses      # Add address
 ```
 
-### MCV Server API (Port 3000)
+## 📦 Sample Medicines
 
-#### 1. Compare Prices Across All Sites
-```bash
-curl -X POST http://localhost:3000/api/mcv/compare-prices \
-  -H "Content-Type: application/json" \
-  -d '{
-    "medicineNames": ["Aspirin 500mg", "Vitamin D3 1000IU", "Paracetamol 500mg"]
-  }'
+### Site-A (Tata 1mg):
+| ID | Medicine | Price | Prescription |
+|----|----------|-------|--------------|
+| MED001 | Paracetamol 500mg (Crocin) | ₹25 | No |
+| MED002 | Azithromycin 500mg (Azithral) | ₹85 | Yes |
+| MED003 | Metformin 500mg (Glycomet) | ₹45 | Yes |
+| MED004 | Omeprazole 20mg (Omez) | ₹65 | No |
+| MED005 | Amoxicillin 500mg (Mox) | ₹55 | Yes |
+| MED006 | Vitamin D3 60000 IU (D-Rise) | ₹120 | No |
+| MED007 | Cetirizine 10mg (Cetzine) | ₹35 | No |
+| MED008 | Atorvastatin 10mg (Atorva) | ₹95 | Yes |
+
+### Site-B (Apollo):
+| ID | Medicine | Price | Prescription |
+|----|----------|-------|--------------|
+| APL001 | Paracetamol 500mg (Dolo) | ₹22 | No |
+| APL002 | Azithromycin 500mg (Zithromax) | ₹95 | Yes |
+| APL003 | Metformin 500mg (Glucophage) | ₹38 | Yes |
+| APL004 | Pantoprazole 40mg (Pan-D) | ₹75 | No |
+| APL005 | Amoxicillin 500mg (Amoxil) | ₹48 | Yes |
+| APL006 | Vitamin D3 60000 IU (Calcirol) | ₹105 | No |
+| APL007 | Levocetirizine 5mg (Xyzal) | ₹42 | No |
+| APL008 | Rosuvastatin 10mg (Crestor) | ₹110 | Yes |
+| APL009 | Ibuprofen 400mg (Brufen) | ₹28 | No |
+| APL010 | Montelukast 10mg (Montair) | ₹135 | Yes |
+
+## 🔄 MCP Server Integration
+
+### Search for medicines across sites:
+```javascript
+// Search by medicine name
+const searchMedicines = async (names) => {
+  const [tata1mgResults, apolloResults] = await Promise.all([
+    fetch('http://localhost:3001/api/medicines/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ names })
+    }),
+    fetch('http://localhost:3002/api/medicines/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ names })
+    })
+  ]);
+  
+  return {
+    tata1mg: await tata1mgResults.json(),
+    apollo: await apolloResults.json()
+  };
+};
 ```
 
-**Response:**
+### Compare prices:
+```javascript
+// Compare prices for same medicine
+const comparePrices = async (medicineName) => {
+  const results = await searchMedicines([medicineName]);
+  
+  return {
+    tata1mg: results.tata1mg.data[0]?.matches[0],
+    apollo: results.apollo.data[0]?.matches[0],
+    cheapest: // determine cheapest
+  };
+};
+```
+
+### Add to cart and checkout:
+```javascript
+// Full purchase flow
+const purchaseMedicine = async (siteUrl, userId, medicineId) => {
+  // Add to cart
+  await fetch(`${siteUrl}/api/cart/${userId}/add`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ medicineId, quantity: 1 })
+  });
+  
+  // Create order
+  const order = await fetch(`${siteUrl}/api/orders/create`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      userId,
+      addressId: 'addr1',
+      paymentMethod: 'UPI'
+    })
+  });
+  
+  // Process payment
+  await fetch(`${siteUrl}/api/orders/${order.orderId}/pay`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ paymentMethod: 'UPI' })
+  });
+  
+  return order;
+};
+```
+
+## 🎨 Features
+
+### Site-A (Tata 1mg Mock):
+- 🎨 Coral/Pink theme (#ff6f61)
+- 📦 1-2 days standard delivery
+- 💰 Free delivery above ₹500
+- 📋 Prescription verification
+
+### Site-B (Apollo Mock):
+- 🎨 Indigo/Blue theme (#1a237e)
+- 🚀 24 hours express delivery
+- 💰 Free delivery above ₹400
+- 🏥 Store locator API
+- 📋 Prescription verification
+
+## 📝 Test User
+
+Both sites have a pre-configured test user:
+
 ```json
 {
-  "success": true,
-  "comparison": {
-    "searchedMedicines": [...],
-    "siteA": [...],
-    "siteB": [...]
-  },
-  "recommendations": [
-    {
-      "medicine": "Aspirin 500mg",
-      "options": [...],
-      "recommendation": "Site B for better price"
-    }
-  ]
+  "userId": "user123",
+  "name": "Test User",
+  "email": "test@example.com",
+  "phone": "9876543210"
 }
 ```
 
-#### 2. Get Sample Prescription
-```bash
-curl http://localhost:3000/api/mcv/test-prescription
-```
+## ⚠️ Important Notes
 
-#### 3. Process Prescription (Semi-Automatic)
-Requires manual approval:
+1. **This is for testing only** - Not connected to real pharmacies
+2. **No real payments** - All transactions are simulated
+3. **Mock data** - Medicine info is for demonstration
+4. **In-memory storage** - Data resets on server restart
+
+## 🧪 Testing with cURL
+
 ```bash
-curl -X POST http://localhost:3000/api/mcv/process-prescription \
+# Get all medicines
+curl http://localhost:3001/api/medicines
+
+# Search medicines
+curl -X POST http://localhost:3001/api/medicines/search \
   -H "Content-Type: application/json" \
-  -d '{
-    "prescription": {
-      "prescriptionId": "RX-001",
-      "medicines": [
-        {"name": "Aspirin 500mg", "quantity": 10},
-        {"name": "Vitamin D3 1000IU", "quantity": 30}
-      ]
-    },
-    "userEmail": "user@example.com",
-    "address": "123 Main St, City",
-    "autoApprove": false
-  }'
-```
+  -d '{"names": ["paracetamol", "azithromycin"]}'
 
-#### 4. Process Prescription (Fully Automatic)
-Auto-approves and places order:
-```bash
-curl -X POST http://localhost:3000/api/mcv/process-prescription \
+# Add to cart
+curl -X POST http://localhost:3001/api/cart/user123/add \
   -H "Content-Type: application/json" \
-  -d '{
-    "prescription": {
-      "prescriptionId": "RX-001",
-      "medicines": [
-        {"name": "Aspirin 500mg", "quantity": 10}
-      ]
-    },
-    "userEmail": "user@example.com",
-    "address": "123 Main St, City",
-    "autoApprove": true,
-    "preferredSite": "B"
-  }'
-```
+  -d '{"medicineId": "MED001", "quantity": 2}'
 
-#### 5. Approve Order (Manual)
-```bash
-curl -X POST http://localhost:3000/api/mcv/approve-order \
+# Get cart
+curl http://localhost:3001/api/cart/user123
+
+# Create order
+curl -X POST http://localhost:3001/api/orders/create \
   -H "Content-Type: application/json" \
-  -d '{
-    "site": "A",
-    "medicines": [
-      {"medicineId": "a1", "quantity": 10}
-    ],
-    "userEmail": "user@example.com",
-    "address": "123 Main St, City"
-  }'
+  -d '{"userId": "user123", "addressId": "addr1", "paymentMethod": "COD"}'
 ```
 
-#### 6. Track Order
-```bash
-curl http://localhost:3000/api/mcv/track-order/SITE-A-1234567890/A
-```
+---
 
-## Features for Your MCV System
-
-✅ **Price Comparison** - Automatically compares prices across multiple sites
-✅ **Automatic/Semi-Automatic Ordering** - Can place orders with or without approval
-✅ **Order Tracking** - Get real-time order status
-✅ **Medicine Search** - Find medicines by name or category
-✅ **Stock Management** - Tracks availability
-✅ **Delivery Time Estimation** - Different delivery speeds per site
-✅ **Quality Ratings** - Compare quality ratings between sites
-
-## Next Steps for Your MCV Server
-
-To build a complete MCV system, you'll need to add:
-
-1. **PDF Prescription Upload** - Parse doctor prescriptions
-2. **Calendar Integration** - Google Calendar & Apple Calendar APIs
-3. **Clinic Finder** - Map integration for nearby clinics
-4. **Appointment Booking** - Schedule appointments
-5. **Medicine Reminders** - Push notifications for medicine intake
-6. **Report Interpreter** - Parse lab reports (blood test, x-ray, etc.)
-7. **User Authentication** - Secure user accounts
-8. **Payment Integration** - Real payment gateways
-9. **Notification System** - Email/SMS/Push notifications
-
-## Testing Tips
-
-1. **Start with price comparison** to verify the MCV server can communicate with both sites
-2. **Test semi-automatic mode first** to ensure approval flow works
-3. **Use curl or Postman** to test APIs
-4. **Monitor console logs** in each terminal to see request flow
-5. **Check stock levels** after placing orders
-
-## Future Enhancements
-
-- Add authentication and user accounts
-- Implement wishlist and favorites
-- Add prescription history
-- Real-time inventory sync
-- Payment gateway integration
-- Multi-city delivery
-- Customer reviews and ratings
-- Medicine expiry tracking
+Built for the MCP Server Prescription Management System 🏥

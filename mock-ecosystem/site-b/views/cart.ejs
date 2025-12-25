@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cart - <%= siteName %></title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; }
+    
+    .header { background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%); color: white; padding: 15px 0; }
+    .header-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; }
+    .logo { font-size: 26px; font-weight: bold; text-decoration: none; color: white; display: flex; align-items: center; gap: 8px; }
+    .logo-icon { width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #1a237e; font-size: 20px; }
+    
+    .main-container { max-width: 1200px; margin: 0 auto; padding: 25px 20px; }
+    h1 { font-size: 26px; margin-bottom: 25px; color: #1a237e; }
+    
+    .cart-layout { display: grid; grid-template-columns: 1fr 350px; gap: 28px; }
+    
+    .cart-items { background: white; border-radius: 14px; padding: 22px; box-shadow: 0 4px 18px rgba(0,0,0,0.08); }
+    
+    .cart-item { display: flex; gap: 18px; padding: 18px 0; border-bottom: 1px solid #eee; }
+    .cart-item:last-child { border-bottom: none; }
+    
+    .item-image { width: 90px; height: 90px; background: linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 35px; }
+    
+    .item-details { flex: 1; }
+    .item-name { font-size: 15px; font-weight: 600; color: #1a237e; margin-bottom: 4px; }
+    .item-brand { font-size: 12px; color: #999; margin-bottom: 8px; }
+    .item-price { font-size: 17px; font-weight: bold; color: #333; }
+    .item-mrp { text-decoration: line-through; color: #999; font-size: 13px; margin-left: 8px; }
+    
+    .item-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+    
+    .qty-controls { display: flex; align-items: center; border: 2px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
+    .qty-btn { width: 34px; height: 34px; border: none; background: #f5f5f5; cursor: pointer; font-size: 16px; }
+    .qty-btn:hover { background: #e0e0e0; }
+    .qty-value { width: 40px; height: 34px; display: flex; align-items: center; justify-content: center; font-weight: 500; }
+    
+    .remove-btn { color: #e53935; background: none; border: none; cursor: pointer; font-size: 13px; }
+    .remove-btn:hover { text-decoration: underline; }
+    
+    .cart-summary { background: white; border-radius: 14px; padding: 24px; box-shadow: 0 4px 18px rgba(0,0,0,0.08); height: fit-content; position: sticky; top: 20px; }
+    .cart-summary h3 { font-size: 17px; margin-bottom: 18px; color: #1a237e; }
+    
+    .summary-row { display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+    .summary-row.total { border-bottom: none; font-size: 19px; font-weight: bold; color: #1a237e; margin-top: 10px; padding-top: 14px; border-top: 2px solid #1a237e; }
+    .savings { color: #43a047; }
+    
+    .checkout-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 18px; transition: all 0.3s; }
+    .checkout-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26, 35, 126, 0.4); }
+    
+    .empty-cart { text-align: center; padding: 55px 20px; }
+    .empty-cart h2 { color: #666; margin-bottom: 12px; }
+    .empty-cart a { color: #3949ab; text-decoration: none; font-weight: 500; }
+    
+    .prescription-warning { background: #fff3e0; border: 1px solid #ffe082; padding: 14px; border-radius: 10px; margin-bottom: 18px; color: #e65100; font-size: 13px; }
+    
+    .express-badge { background: #e3f2fd; color: #1565c0; padding: 14px; border-radius: 10px; margin-top: 14px; font-size: 13px; text-align: center; }
+    
+    @media (max-width: 768px) { .cart-layout { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-container">
+      <a href="/" class="logo"><span class="logo-icon">🏥</span> Apollo Pharmacy</a>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <h1>🛒 Your Cart</h1>
+    
+    <% if (cart.items.length === 0) { %>
+      <div class="empty-cart">
+        <h2>Your cart is empty</h2>
+        <p>Add medicines to get started!</p>
+        <a href="/">← Browse Medicines</a>
+      </div>
+    <% } else { %>
+      <% const hasPrescriptionItems = cart.items.some(item => item.prescriptionRequired); %>
+      <% if (hasPrescriptionItems) { %>
+        <div class="prescription-warning">
+          ⚠️ Some items require a valid prescription. Please have it ready during checkout.
+        </div>
+      <% } %>
+      
+      <div class="cart-layout">
+        <div class="cart-items">
+          <% cart.items.forEach(item => { %>
+            <div class="cart-item" data-id="<%= item.medicineId %>">
+              <div class="item-image">💊</div>
+              <div class="item-details">
+                <h4 class="item-name"><%= item.name %></h4>
+                <p class="item-brand"><%= item.brand %></p>
+                <% if (item.prescriptionRequired) { %>
+                  <span style="background: #fff3e0; color: #e65100; padding: 3px 8px; border-radius: 4px; font-size: 10px;">📋 Rx Required</span>
+                <% } %>
+                <p style="margin-top: 8px;">
+                  <span class="item-price">₹<%= item.subtotal.toFixed(2) %></span>
+                  <span class="item-mrp">₹<%= (item.mrp * item.quantity).toFixed(2) %></span>
+                </p>
+              </div>
+              <div class="item-actions">
+                <div class="qty-controls">
+                  <button class="qty-btn qty-dec" data-medicine-id="<%= item.medicineId %>" data-quantity="<%= item.quantity - 1 %>">−</button>
+                  <span class="qty-value"><%= item.quantity %></span>
+                  <button class="qty-btn qty-inc" data-medicine-id="<%= item.medicineId %>" data-quantity="<%= item.quantity + 1 %>">+</button>
+                </div>
+                <button class="remove-btn" data-medicine-id="<%= item.medicineId %>">🗑️ Remove</button>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+        
+        <div class="cart-summary">
+          <h3>Order Summary</h3>
+          <div class="summary-row">
+            <span>Subtotal (<%= cart.itemCount %> items)</span>
+            <span>₹<%= cart.items.reduce((sum, i) => sum + (i.mrp * i.quantity), 0).toFixed(2) %></span>
+          </div>
+          <div class="summary-row savings">
+            <span>You Save</span>
+            <span>- ₹<%= (cart.savings || 0).toFixed(2) %></span>
+          </div>
+          <div class="summary-row">
+            <span>Delivery</span>
+            <span><%= cart.total >= 400 ? 'FREE' : '₹30.00' %></span>
+          </div>
+          <div class="summary-row total">
+            <span>Total</span>
+            <span>₹<%= (cart.total + (cart.total >= 400 ? 0 : 30)).toFixed(2) %></span>
+          </div>
+          <button class="checkout-btn" onclick="proceedToCheckout()">Proceed to Checkout</button>
+          <div class="express-badge">🚀 Express delivery available - Get it in 24 hours!</div>
+        </div>
+      </div>
+    <% } %>
+  </main>
+
+  <script>
+    const userId = '<%= userId %>';
+    
+    // Add event listeners for quantity buttons
+    document.querySelectorAll('.qty-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const medicineId = this.dataset.medicineId;
+        const quantity = parseInt(this.dataset.quantity);
+        updateQuantity(medicineId, quantity);
+      });
+    });
+    
+    document.querySelectorAll('.remove-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const medicineId = this.dataset.medicineId;
+        removeItem(medicineId);
+      });
+    });
+    
+    async function updateQuantity(medicineId, quantity) {
+      if (quantity < 1) { await removeItem(medicineId); return; }
+      const response = await fetch(`/api/cart/${userId}/update`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ medicineId, quantity })
+      });
+      if ((await response.json()).success) location.reload();
+    }
+    
+    async function removeItem(medicineId) {
+      const response = await fetch(`/api/cart/${userId}/remove/${medicineId}`, { method: 'DELETE' });
+      if ((await response.json()).success) location.reload();
+    }
+    
+    function proceedToCheckout() {
+      window.location.href = '/checkout?userId=' + userId;
+    }
+  </script>
+</body>
+</html>
