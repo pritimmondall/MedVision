@@ -682,8 +682,7 @@
 
                 <div class="delivery-info">
                   <h4>🚚 Delivery Information</h4>
-                  <p>Estimated delivery: <%= medicine.deliveryTime %>
-                  </p>
+                  <p>Estimated delivery: <span id="delivery-days">1</span> Day (Tomorrow)</p>
                   <p>Free delivery on orders above ₹500</p>
                 </div>
         </div>
@@ -809,7 +808,7 @@
                   <%= product.brand %>
                 </p>
                 <p class="price">₹<%= product.price.toFixed(2) %> <span class="mrp">₹<%= product.mrp.toFixed(2) %>
-                        </span></p>
+                    </span></p>
                 <a href="/product/<%= product.id %>">View Details →</a>
               </div>
               <% }); %>
@@ -838,7 +837,7 @@
   <script>
     // SAFETY CHECK: Only define these if medicine exists
     const medicineId = "<%= medicine ? medicine.id : '' %>";
-    
+
     const userId = 'user123';
 
     function updateQty(change) {
@@ -871,35 +870,34 @@
 
     async function addToCart(medicineId) {
       if (!medicineId) return;
-      const quantityInput = document.getElementById('quantity');
-      const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
+      const quantity = parseInt(document.getElementById('quantity').value);
 
       try {
         const response = await fetch(`/api/cart/${userId}/add`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ medicineId, quantity })
         });
 
         const data = await response.json();
 
         if (data.success) {
-          showToast('Added to cart successfully!', 'success');
-          const cartCount = document.getElementById('cartCount');
-          if (cartCount) cartCount.textContent = data.data.itemCount;
+          showToast('✓ Added to cart! Redirecting...', 'success');
+          // FIX: Wait 1 second, then go STRAIGHT to checkout
+          setTimeout(() => {
+            window.location.href = '/checkout?userId=' + userId;
+          }, 1000);
         } else {
-          showToast(data.error || 'Failed to add to cart', 'error');
+          showToast(data.error || 'Failed to add', 'error');
         }
       } catch (error) {
         showToast('Error adding to cart', 'error');
       }
     }
 
+    // Make Buy Now do the exact same thing
     async function buyNow(medicineId) {
       await addToCart(medicineId);
-      window.location.href = '/checkout?userId=' + userId;
     }
 
     // Load cart count on page load

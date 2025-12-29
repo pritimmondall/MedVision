@@ -6,106 +6,104 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 class PharmaAgent:
     def __init__(self):
-        # SETTINGS
-        self.site_a_url = "http://localhost:3001"
-        self.site_b_url = "http://localhost:3002"
+        # Site Configuration
+        self.sites = [
+            {"name": "MockPharma A", "url": "http://localhost:3001", "id": "site_a"},
+            {"name": "MockPharma B", "url": "http://localhost:3002", "id": "site_b"}
+        ]
         
-        # Setup Chrome Browser
         options = webdriver.ChromeOptions()
-        # IMPORTANT: We leave this False so you can SEE the bot working
         options.add_argument("--start-maximized")
-        
-        # Initialize Driver
         self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-        print("[AGENT] Browser Launched.")
 
-    def get_price_from_site(self, site_url, medicine_name):
-        """Visits a site, searches, and scrapes the price."""
+    def get_product_details(self, site_url, medicine_name):
+        """Scrapes BOTH Price and Delivery Days."""
         try:
             print(f"[AGENT] Checking {site_url} for {medicine_name}...")
-            
-            # 1. Go to Search Page
-            search_url = f"{site_url}/search?q={medicine_name}"
-            self.driver.get(search_url)
-            time.sleep(1) # Wait for simulation
-            
-            # 2. Extract Price (Using the IDs Member 4 created)
-            # We assume the dummy site has <span id="med-price">25</span>
+            self.driver.get(f"{site_url}/search?q={medicine_name}")
+            time.sleep(1) # Wait for load
+
+            # 1. Scrape Price
             price_element = self.driver.find_element(By.ID, "med-price")
             price = float(price_element.text)
+
+            # 2. Scrape Delivery Days (The new feature)
+            try:
+                days_element = self.driver.find_element(By.ID, "delivery-days")
+                days = int(days_element.text)
+            except:
+                days = 5 # Default to 5 days if not found
             
-            print(f"   -> Found price: ₹{price}")
-            return price
-        except Exception as e:
-            print(f"   -> {medicine_name} not found on {site_url}")
-            return float('inf') # Infinite price if not found
+            return {"price": price, "days": days, "found": True}
+        
+        except Exception:
+            return {"price": float('inf'), "days": 99, "found": False}
 
     def execute_purchase(self, site_url, medicine_name):
-        """Goes to the specific site and clicks the Buy button."""
-        print(f"[AGENT] DECISION MADE: Buying {medicine_name} from {site_url}")
-        
-        # 1. Navigate to the item
+        """Executes the actual buy action."""
+        print(f"   -> BUYING from {site_url}...")
         self.driver.get(f"{site_url}/search?q={medicine_name}")
         time.sleep(1)
         
-        # 2. Click "Add to Cart" / "Buy"
         try:
-            buy_btn = self.driver.find_element(By.ID, "add-to-cart")
-            buy_btn.click()
-            print("[AGENT] 'Add to Cart' Clicked!")
+            # Click Add to Cart (which now auto-redirects to checkout)
+            self.driver.find_element(By.ID, "add-to-cart").click()
+            time.sleep(2) # Wait for redirect
             
-            # 3. Simulate Checkout (Wait so we can see it)
+            # Click Place Order
+            self.driver.find_element(By.ID, "placeOrderBtn").click()
             time.sleep(2)
-            
-            # Handle standard JS Alert if the dummy site has one
-            try:
-                alert = self.driver.switch_to.alert
-                alert.accept()
-                print("[AGENT] Accepted Purchase Popup.")
-            except:
-                pass
-                
         except Exception as e:
-            print(f"[AGENT] Error clicking buy button: {e}")
+            print(f"   -> Purchase Failed: {e}")
 
-    def process_order(self, medicine_list):
-        """Main Loop: Iterates through all medicines in prescription."""
+    def process_order(self, medicine_list, user_priority="price"):
+        """
+        user_priority: 'price' or 'delivery'
+        """
         results = []
         
         for med in medicine_list:
-            name = med['name'] # Expected from Gemini JSON
+            name = med['name']
+            print(f"\n--- Processing: {name} (Priority: {user_priority}) ---")
             
-            # 1. Compare Prices
-            price_a = self.get_price_from_site(self.site_a_url, name)
-            price_b = self.get_price_from_site(self.site_b_url, name)
-            
-            if price_a == float('inf') and price_b == float('inf'):
-                print(f"[AGENT] SKIPPING: {name} not found anywhere.")
+            # 1. Gather Data from All Sites
+            site_data = []
+            for site in self.sites:
+                details = self.get_product_details(site['url'], name)
+                if details['found']:
+                    details['site_name'] = site['name']
+                    details['url'] = site['url']
+                    site_data.append(details)
+
+            if not site_data:
+                print("   -> Not found anywhere.")
                 continue
 
-            # 2. Decision Logic
-            if price_a < price_b:
-                best_site = self.site_a_url
-                best_price = price_a
-                site_name = "MockPharma A"
-            else:
-                best_site = self.site_b_url
-                best_price = price_b
-                site_name = "MockPharma B"
+            # 2. THE NEW DECISION LOGIC
+            best_option = None
+            
+            if user_priority == "price":
+                # Sort primarily by Price (Low to High), secondarily by Days
+                site_data.sort(key=lambda x: (x['price'], x['days']))
+            else: # priority == "delivery"
+                # Sort primarily by Days (Low to High), secondarily by Price
+                site_data.sort(key=lambda x: (x['days'], x['price']))
+            
+            best_option = site_data[0] # The first item is now the best choice
 
-            # 3. Action (The "Buying" Part)
-            self.execute_purchase(best_site, name)
+            print(f"   -> Winner: {best_option['site_name']} (₹{best_option['price']}, {best_option['days']} days)")
+
+            # 3. Buy It
+            self.execute_purchase(best_option['url'], name)
             
             results.append({
                 "medicine": name,
-                "bought_from": site_name,
-                "price": best_price,
-                "status": "Ordered"
+                "bought_from": best_option['site_name'],
+                "price": best_option['price'],
+                "delivery_days": best_option['days']
             })
             
         return results
 
     def close(self):
-        print("[AGENT] Work done. Closing browser.")
-        time.sleep(2)
         self.driver.quit()

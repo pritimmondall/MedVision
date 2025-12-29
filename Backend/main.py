@@ -1,10 +1,11 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Form
 import easyocr
 import shutil
 import google.generativeai as genai
 import os
 import json
 from dotenv import load_dotenv
+from agent.bot import PharmaAgent
 
 # --- NEW IMPORT: Import your Bot ---
 # This assumes your folder structure is backend/agent/bot.py
@@ -64,15 +65,68 @@ def parse_with_ai(ocr_text_list):
         print(f"AI PARSING ERROR: {e}")
         return {"error": "AI Parsing Failed", "medicines": []} # Return empty medicines on error
 
+# @app.post("/process-prescription")
+# async def process_prescription(file: UploadFile = File(...)):
+#     temp_filename = f"temp_{file.filename}"
+#     with open(temp_filename, "wb") as buffer:
+#         shutil.copyfileobj(file.file, buffer)
+
+#     try:
+#         # 1. OCR (The Eyes)
+#         print(f"Processing image: {file.filename}")
+#         ocr_result = reader.readtext(temp_filename, detail=0)
+        
+#         # 2. AI Processing (The Brain)
+#         structured_data = parse_with_ai(ocr_result)
+        
+#         # 3. AGENT EXECUTION (The Hands)
+#         agent_report = []
+        
+#         # Only run the bot if we actually found medicines
+#         if "medicines" in structured_data and len(structured_data["medicines"]) > 0:
+#             print(f"Found {len(structured_data['medicines'])} medicines. Launching Agent...")
+            
+#             try:
+#                 # Initialize the Bot
+#                 bot = PharmaAgent()
+                
+#                 # Run the shopping logic
+#                 agent_report = bot.process_order(structured_data["medicines"])
+                
+#                 # Close the browser
+#                 bot.close()
+#             except Exception as e:
+#                 print(f"AGENT FAILED: {e}")
+#                 agent_report = [{"error": str(e), "status": "Agent Crashed"}]
+#         else:
+#             print("No medicines found to buy.")
+
+#         # 4. Final Response
+#         return {
+#             "status": "success",
+#             "structured_data": structured_data,
+#             "agent_report": agent_report, # This contains the "Bought from Site A" details
+#             "raw_ocr": ocr_result
+#         }
+        
+#     finally:
+#         # Cleanup temp file
+#         if os.path.exists(temp_filename):
+#             os.remove(temp_filename)
+
+
 @app.post("/process-prescription")
-async def process_prescription(file: UploadFile = File(...)):
+async def process_prescription(
+    file: UploadFile = File(...),
+    priority: str = Form("price")  # <--- NEW: Accepts "price" or "delivery" (defaults to price)
+):
     temp_filename = f"temp_{file.filename}"
     with open(temp_filename, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
     try:
         # 1. OCR (The Eyes)
-        print(f"Processing image: {file.filename}")
+        print(f"Processing image: {file.filename} with Priority: {priority.upper()}")
         ocr_result = reader.readtext(temp_filename, detail=0)
         
         # 2. AI Processing (The Brain)
@@ -81,18 +135,18 @@ async def process_prescription(file: UploadFile = File(...)):
         # 3. AGENT EXECUTION (The Hands)
         agent_report = []
         
-        # Only run the bot if we actually found medicines
         if "medicines" in structured_data and len(structured_data["medicines"]) > 0:
             print(f"Found {len(structured_data['medicines'])} medicines. Launching Agent...")
             
             try:
-                # Initialize the Bot
                 bot = PharmaAgent()
                 
-                # Run the shopping logic
-                agent_report = bot.process_order(structured_data["medicines"])
+                # --- UPDATE: Pass the user's priority to the bot ---
+                agent_report = bot.process_order(
+                    structured_data["medicines"], 
+                    user_priority=priority
+                )
                 
-                # Close the browser
                 bot.close()
             except Exception as e:
                 print(f"AGENT FAILED: {e}")
@@ -103,12 +157,12 @@ async def process_prescription(file: UploadFile = File(...)):
         # 4. Final Response
         return {
             "status": "success",
+            "priority_used": priority,
             "structured_data": structured_data,
-            "agent_report": agent_report, # This contains the "Bought from Site A" details
+            "agent_report": agent_report,
             "raw_ocr": ocr_result
         }
         
     finally:
-        # Cleanup temp file
         if os.path.exists(temp_filename):
             os.remove(temp_filename)
