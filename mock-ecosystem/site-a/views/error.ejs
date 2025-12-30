@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Error - <%= message %></title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #f4f4f4; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .error-card { background: white; padding: 40px; border-radius: 16px; text-align: center; box-shadow: 0 4px 30px rgba(0,0,0,0.1); }
+    .error-icon { font-size: 60px; margin-bottom: 20px; }
+    h1 { color: #333; margin-bottom: 10px; }
+    p { color: #666; margin-bottom: 20px; }
+    a { color: #ff6f61; text-decoration: none; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div class="error-card">
+    <div class="error-icon">😕</div>
+    <h1>Oops!</h1>
+    <p><%= message %></p>
+    <a href="/">← Back to Home</a>
+  </div>
+</body>
+</html>

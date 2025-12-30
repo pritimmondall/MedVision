@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout - <%= siteName %></title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; }
+    
+    .header { background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%); color: white; padding: 15px 0; }
+    .header-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; }
+    .logo { font-size: 26px; font-weight: bold; text-decoration: none; color: white; display: flex; align-items: center; gap: 8px; }
+    .logo-icon { width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #1a237e; font-size: 20px; }
+    
+    .main-container { max-width: 1200px; margin: 0 auto; padding: 25px 20px; }
+    h1 { font-size: 26px; margin-bottom: 25px; color: #1a237e; }
+    
+    .checkout-layout { display: grid; grid-template-columns: 1fr 380px; gap: 28px; }
+    
+    .checkout-section { background: white; border-radius: 14px; padding: 24px; margin-bottom: 18px; box-shadow: 0 4px 18px rgba(0,0,0,0.08); }
+    .checkout-section h3 { font-size: 16px; margin-bottom: 18px; color: #1a237e; display: flex; align-items: center; gap: 8px; }
+    
+    .address-card { border: 2px solid #e0e0e0; border-radius: 10px; padding: 14px; cursor: pointer; transition: all 0.3s; }
+    .address-card.selected { border-color: #3949ab; background: #e8eaf6; }
+    .address-card h4 { font-size: 13px; color: #1a237e; margin-bottom: 4px; }
+    .address-card p { font-size: 12px; color: #666; line-height: 1.6; }
+    
+    .payment-options { display: flex; flex-direction: column; gap: 10px; }
+    .payment-option { display: flex; align-items: center; gap: 12px; padding: 14px; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; transition: all 0.3s; }
+    .payment-option.selected { border-color: #3949ab; background: #e8eaf6; }
+    .payment-option input[type="radio"] { width: 18px; height: 18px; accent-color: #3949ab; }
+    .payment-option label { cursor: pointer; font-size: 13px; }
+    
+    .upload-section { border: 2px dashed #bbb; border-radius: 10px; padding: 28px; text-align: center; }
+    .upload-section.uploaded { border-color: #43a047; background: #e8f5e9; }
+    .upload-btn { padding: 10px 18px; background: #3949ab; color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; }
+    
+    .order-summary { background: white; border-radius: 14px; padding: 24px; box-shadow: 0 4px 18px rgba(0,0,0,0.08); position: sticky; top: 20px; }
+    .order-summary h3 { font-size: 16px; margin-bottom: 18px; color: #1a237e; }
+    
+    .summary-items { max-height: 180px; overflow-y: auto; margin-bottom: 18px; }
+    .summary-item { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #eee; font-size: 13px; }
+    
+    .summary-row { display: flex; justify-content: space-between; padding: 9px 0; font-size: 14px; }
+    .summary-row.total { font-size: 18px; font-weight: bold; color: #1a237e; border-top: 2px solid #1a237e; margin-top: 10px; padding-top: 14px; }
+    .savings { color: #43a047; }
+    
+    .place-order-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 18px; transition: all 0.3s; }
+    .place-order-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26, 35, 126, 0.4); }
+    .place-order-btn:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+    
+    .secure-badge { text-align: center; margin-top: 14px; color: #666; font-size: 12px; }
+    .express-badge { background: #e3f2fd; color: #1565c0; padding: 12px; border-radius: 8px; margin-top: 14px; font-size: 12px; text-align: center; }
+    
+    @media (max-width: 768px) { .checkout-layout { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-container">
+      <a href="/" class="logo"><span class="logo-icon">🏥</span> Apollo Pharmacy</a>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <h1>Secure Checkout</h1>
+    
+    <div class="checkout-layout">
+      <div class="checkout-forms">
+        <div class="checkout-section">
+          <h3>📍 Delivery Address</h3>
+          <% if (user && user.addresses.length > 0) { %>
+            <% user.addresses.forEach((addr, index) => { %>
+              <div class="address-card <%= index === 0 ? 'selected' : '' %>" onclick="selectAddress('<%= addr.id %>', this)">
+                <h4><%= addr.type %> <%= addr.isDefault ? '(Default)' : '' %></h4>
+                <p><%= addr.line1 %><br><%= addr.line2 %><br><%= addr.city %>, <%= addr.state %> - <%= addr.pincode %></p>
+              </div>
+            <% }); %>
+          <% } else { %>
+            <div class="address-card selected">
+              <h4>Home (Default)</h4>
+              <p>456 Apollo Street<br>Block C, Sector 12<br>Bangalore, Karnataka - 560001</p>
+            </div>
+          <% } %>
+        </div>
+
+        <% const needsPrescription = cart.items.some(item => item.prescriptionRequired); %>
+        <input type="hidden" id="needsPrescriptionData" value="<%= needsPrescription %>">
+        <% if (needsPrescription) { %>
+        <div class="checkout-section">
+          <h3>📋 Upload Prescription</h3>
+          <div class="upload-section" id="uploadSection">
+            <p>Prescription required for some items</p>
+            <p style="font-size: 12px; color: #666; margin-top: 4px;">Upload a clear image of your doctor's prescription</p>
+            <button class="upload-btn" onclick="uploadPrescription()">📎 Select File</button>
+            <input type="file" id="prescriptionFile" style="display: none;" accept="image/*,.pdf" onchange="handleFileSelect(this)">
+          </div>
+        </div>
+        <% } %>
+
+        <div class="checkout-section">
+          <h3>💳 Payment Method</h3>
+          <div class="payment-options">
+            <div class="payment-option selected" onclick="selectPayment('COD', this)">
+              <input type="radio" name="payment" id="cod" checked>
+              <label for="cod">💵 Cash on Delivery</label>
+            </div>
+            <div class="payment-option" onclick="selectPayment('UPI', this)">
+              <input type="radio" name="payment" id="upi">
+              <label for="upi">📱 UPI Payment</label>
+            </div>
+            <div class="payment-option" onclick="selectPayment('CARD', this)">
+              <input type="radio" name="payment" id="card">
+              <label for="card">💳 Credit/Debit Card</label>
+            </div>
+            <div class="payment-option" onclick="selectPayment('WALLET', this)">
+              <input type="radio" name="payment" id="wallet">
+              <label for="wallet">👛 Apollo Wallet</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="order-summary">
+        <h3>Order Summary</h3>
+        <div class="summary-items">
+          <% cart.items.forEach(item => { %>
+            <div class="summary-item">
+              <span><%= item.name %> ×<%= item.quantity %></span>
+              <span>₹<%= item.subtotal.toFixed(2) %></span>
+            </div>
+          <% }); %>
+        </div>
+        <div class="summary-row"><span>Subtotal</span><span>₹<%= cart.total.toFixed(2) %></span></div>
+        <div class="summary-row savings"><span>Discount</span><span>- ₹<%= (cart.savings || 0).toFixed(2) %></span></div>
+        <div class="summary-row"><span>Delivery</span><span><%= cart.total >= 400 ? 'FREE' : '₹30.00' %></span></div>
+        <div class="summary-row total"><span>Total</span><span>₹<%= (cart.total + (cart.total >= 400 ? 0 : 30)).toFixed(2) %></span></div>
+        
+        <button class="place-order-btn" id="placeOrderBtn" onclick="placeOrder()">Place Order</button>
+        <p class="secure-badge">🔒 100% Secure Checkout</p>
+        <div class="express-badge">🚀 Expected Delivery: Tomorrow</div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const userId = '<%= user ? user.id : "user123" %>';
+    let selectedAddress = '<%= user && user.addresses.length > 0 ? user.addresses[0].id : "addr1" %>';
+    let selectedPayment = 'COD';
+    const needsPrescriptionFlag = document.getElementById('needsPrescriptionData').value === 'true';
+    let prescriptionUploaded = !needsPrescriptionFlag;
+    
+    function selectAddress(addressId, element) {
+      document.querySelectorAll('.address-card').forEach(card => card.classList.remove('selected'));
+      element.classList.add('selected');
+      selectedAddress = addressId;
+    }
+    
+    function selectPayment(method, element) {
+      document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
+      element.classList.add('selected');
+      element.querySelector('input').checked = true;
+      selectedPayment = method;
+    }
+    
+    function uploadPrescription() { document.getElementById('prescriptionFile').click(); }
+    
+    function handleFileSelect(input) {
+      if (input.files && input.files[0]) {
+        const section = document.getElementById('uploadSection');
+        section.classList.add('uploaded');
+        section.innerHTML = '<p style="color: #43a047;">✓ ' + input.files[0].name + '</p><button class="upload-btn" onclick="uploadPrescription()">Change</button><input type="file" id="prescriptionFile" style="display: none;" accept="image/*,.pdf" onchange="handleFileSelect(this)">';
+        prescriptionUploaded = true;
+      }
+    }
+    
+    async function placeOrder() {
+      if (needsPrescriptionFlag && !prescriptionUploaded) {
+        alert('Please upload a prescription.');
+        return;
+      }
+      
+      const btn = document.getElementById('placeOrderBtn');
+      btn.disabled = true;
+      btn.textContent = 'Processing...';
+      
+      try {
+        const response = await fetch('/api/orders/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId,
+            addressId: selectedAddress,
+            paymentMethod: selectedPayment,
+            prescriptionUrl: prescriptionUploaded ? '/prescriptions/mock.pdf' : null
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          if (selectedPayment !== 'COD') {
+            await fetch(`/api/orders/${data.data.orderId}/pay`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ paymentMethod: selectedPayment })
+            });
+          }
+          window.location.href = '/order/' + data.data.orderId;
+        } else {
+          alert(data.error || 'Order failed');
+          btn.disabled = false;
+          btn.textContent = 'Place Order';
+        }
+      } catch (error) {
+        alert('Error placing order');
+        btn.disabled = false;
+        btn.textContent = 'Place Order';
+      }
+    }
+  </script>
+</body>
+</html>
