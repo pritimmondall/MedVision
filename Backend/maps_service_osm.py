@@ -16,17 +16,14 @@ def calculate_distance(lat1, lon1, lat2, lon2):
 
 def find_labs_osm(lat, lng, test_names=[]):
     """
-    1. Fetches JSON data from OSM (for your future frontend pins).
-    2. Generates a Smart Google Maps Link (for your current demo).
+    1. Fetches OSM Data.
+    2. Sorts by Distance to find the 'Nearest'.
+    3. Generates a 'Navigate to Best' Google Maps Link.
     """
     
-    # --- PART 1: FETCH DATA FROM OSM (Nominatim) ---
-    # This data is for "Round 2" when you build your Next.js dashboard.
+    # --- PART 1: FETCH RAW DATA (Nominatim) ---
     url = "https://nominatim.openstreetmap.org/search"
-    
-    # We search broadly in OSM to ensure we get *some* data for the JSON
     osm_query = "hospital clinic medical"
-    
     headers = { "User-Agent": "MedVision-Project/1.0" }
     
     params = {
@@ -46,7 +43,7 @@ def find_labs_osm(lat, lng, test_names=[]):
         
         for place in data:
             dist = calculate_distance(lat, lng, place.get("lat"), place.get("lon"))
-            # Filter: Only show places within 15km
+            # Filter: Must be within 15km
             if dist <= 15.0:
                 labs_list.append({
                     "name": place.get("display_name", "").split(",")[0],
@@ -54,37 +51,46 @@ def find_labs_osm(lat, lng, test_names=[]):
                     "lat": place.get("lat"),
                     "lon": place.get("lon"),
                     "distance_km": dist,
-                    "osm_link": f"https://www.openstreetmap.org/node/{place.get('osm_id')}"
+                    "type": place.get("type")
                 })
         
-        # Sort by distance
+        # Sort by distance (Index 0 is now the Nearest/Best)
         labs_list.sort(key=lambda x: x["distance_km"])
 
     except Exception as e:
         print(f"[OSM] Data Fetch Error: {e}")
-        # We don't crash; we just return an empty list for the frontend
         labs_list = []
 
-    # --- PART 2: GENERATE SMART GOOGLE MAPS LINK ---
-    # This determines what the user actually SEES when they click the link.
+    # --- PART 2: GENERATE LINKS ---
     
-    # Logic: If prescription has 'X-Ray' or 'Scan', search for 'Diagnostic Centre'.
-    # If 'Blood' or 'CBC', search for 'Pathology Lab'.
-    # Default to 'Hospital'.
-    
-    query_term = "Hospital" # Default
+    # Link A: Visual Search (The "Explore" view)
     tests_str = " ".join(test_names).lower()
-    
-    if "x-ray" in tests_str or "scan" in tests_str or "mri" in tests_str:
+    if "x-ray" in tests_str or "scan" in tests_str:
         query_term = "Diagnostic+Centre"
-    elif "blood" in tests_str or "cbc" in tests_str or "urine" in tests_str:
+    elif "blood" in tests_str:
         query_term = "Pathology+Lab"
-    
-    # Standard Google Search URL syntax:
-    # https://www.google.com/maps/search/{query}/@{lat},{lng},{zoom}z
-    google_maps_link = f"https://www.google.com/maps/search/{query_term}/@{lat},{lng},14z"
+    else:
+        query_term = "Hospital"
+        
+    encoded_query = f"{query_term} near {lat},{lng}".replace(" ", "+").replace(",", "%2C")
+    search_link = f"https://www.google.com/maps/search/{encoded_query}/@{lat},{lng},14z"
+
+    # Link B: NAVIGATION (The "Go Now" view)
+    # If we found at least one lab, we set the destination to the nearest one.
+    directions_link = ""
+    if len(labs_list) > 0:
+        best_lab = labs_list[0]
+        # Google Maps Direction Format: 
+        # https://www.google.com/maps/dir/?api=1&origin={lat},{lng}&destination={lat},{lng}
+        directions_link = (
+            f"https://www.google.com/maps/dir/?api=1"
+            f"&origin={lat},{lng}"
+            f"&destination={best_lab['lat']},{best_lab['lon']}"
+            f"&travelmode=driving"
+        )
 
     return {
-        "labs": labs_list[:5],        # Backend Data (OSM)
-        "map_view_link": google_maps_link # Frontend Visual (Google Maps)
+        "labs": labs_list[:5],        
+        "map_search_link": search_link,    # View Area
+        "map_directions_link": directions_link # Navigate to Nearest
     }
