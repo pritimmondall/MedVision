@@ -1,6 +1,6 @@
 # 🏥 MedVision: Autonomous Prescription Orchestrator
 
-**MedVision** is an intelligent Model Context Protocol (MCP) server that automates the entire pharmacy workflow. It takes a doctor's prescription, digitizes it using AI, and uses autonomous agents to find the best medicine deals (optimizing for price or delivery speed) across multiple pharmacy vendors. It also schedules follow-up appointments automatically via Google Calendar.
+**MedVision** is an intelligent Model Context Protocol (MCP) server that automates the entire pharmacy workflow. It takes a doctor's prescription, digitizes it using AI, and uses autonomous agents to find the best medicine deals (optimizing for price or delivery speed) across multiple pharmacy vendors. It also schedules follow-up appointments automatically via Google Calendar and detects user location and launches Google Maps with  the nearest pathology lab for tests (xray, blood test)
 
 ----------------------------------------------------------------------------
 
@@ -14,6 +14,8 @@
     4. Autonomous Shopping: An agent compares prices and delivery times across multiple pharmacy sites, then auto-checks out the best option.
     5. Order Confirmation: The backend logs the order and provides confirmation.
     6. Calendar Integration: If a follow-up date is detected, an event is automatically created in the user's Google Calendar.
+    7. Route Navigation: Detects user location and launches Google Maps with  the nearest pathology lab.
+
 
 ### 2. System Architecture
 ```mermaid
@@ -88,6 +90,8 @@ graph TD;
     3. AI-Powered Patient Adherence Guide
         Generate personalized medicine intake guides.
         Alert users about side effects and special instructions.
+        
+    (All these fatures are integrated for round 2)
 
 
 ## Setup & Installation
@@ -123,8 +127,13 @@ Terminal 3
 
 *uvicorn main:app --reload*
 
+Terminal 4
+--------------
+*cd Frontend*
+*python3 -m http.server 5500*
+
 ### 3. Usage
-Visit *http://localhost:8000/docs*
+Visit *http://localhost:5500*
 ---------------------------------
 Upload a prescription and watch the bot work!
 
