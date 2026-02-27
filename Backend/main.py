@@ -181,3 +181,6 @@ async def find_labs_endpoint(request: LabSearchRequest):
         "status": "success", 
         "url": result.get("map_directions_link")
     }
+
+
+# RUN WITH: uvicorn main:app --reload
